@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CalendarModule } from 'primeng/calendar';
 import { CardModule } from 'primeng/card';
@@ -40,6 +41,7 @@ import { ReportDialogComponent } from './pages/report-dialog/report-dialog.compo
     ToastModule,
     CardModule,
     TooltipModule
-  ]
+  ],
+  providers: [ConfirmationService]
 })
 export class PatientsModule { }
