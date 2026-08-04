@@ -1,0 +1,25 @@
+# --- .NET ---
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.userprefs
+TestResults/
+coverage/
+
+# --- Angular / Node ---
+node_modules/
+dist/
+.angular/
+*.tsbuildinfo
+
+# --- IDE / OS ---
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# --- Tooling ---
+.atl/
+.env
