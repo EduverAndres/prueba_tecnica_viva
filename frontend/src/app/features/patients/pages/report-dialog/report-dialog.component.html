@@ -1,0 +1,10 @@
+<p-dialog [(visible)]="visible" header="Patients report" [modal]="true" [style]="{ width: '420px' }">
+  <div class="report-body">
+    <p>Export patients created after:</p>
+    <p-calendar [(ngModel)]="fromDate" [showIcon]="true" dateFormat="dd/mm/yy" [maxDate]="today" [readonlyInput]="true" placeholder="Select a date"></p-calendar>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" styleClass="p-button-text" (click)="close()"></button>
+    <button pButton label="Export CSV" icon="pi pi-download" [loading]="exporting" [disabled]="!fromDate || exporting" (click)="exportCsv()"></button>
+  </ng-template>
+</p-dialog>

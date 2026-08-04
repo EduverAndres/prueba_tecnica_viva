@@ -1,0 +1,82 @@
+<div class="form-container">
+  <h2>{{ isEdit ? 'Edit patient' : 'New patient' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="documentType">Document type *</label>
+        <p-dropdown
+          id="documentType"
+          [options]="documentTypes"
+          formControlName="documentType"
+          placeholder="Select type"
+          [showClear]="true"></p-dropdown>
+        <small class="error" *ngIf="form.controls['documentType'].touched && form.controls['documentType'].errors?.['required']">
+          Document type is required.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="documentNumber">Document number *</label>
+        <input id="documentNumber" pInputText type="text" formControlName="documentNumber" />
+        <small class="error" *ngIf="form.controls['documentNumber'].touched && form.controls['documentNumber'].errors?.['required']">
+          Document number is required.
+        </small>
+        <small class="error" *ngIf="form.controls['documentNumber'].errors?.['duplicate']">
+          A patient with this document already exists.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="firstName">First name *</label>
+        <input id="firstName" pInputText type="text" formControlName="firstName" />
+        <small class="error" *ngIf="form.controls['firstName'].touched && form.controls['firstName'].errors?.['required']">
+          First name is required.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="lastName">Last name *</label>
+        <input id="lastName" pInputText type="text" formControlName="lastName" />
+        <small class="error" *ngIf="form.controls['lastName'].touched && form.controls['lastName'].errors?.['required']">
+          Last name is required.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="birthDate">Birth date *</label>
+        <p-calendar
+          id="birthDate"
+          formControlName="birthDate"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          [maxDate]="today"
+          [readonlyInput]="true"></p-calendar>
+        <small class="error" *ngIf="form.controls['birthDate'].touched && form.controls['birthDate'].errors?.['required']">
+          Birth date is required.
+        </small>
+        <small class="error" *ngIf="form.controls['birthDate'].errors?.['futureDate']">
+          Birth date cannot be in the future.
+        </small>
+      </div>
+
+      <div class="form-field">
+        <label for="phoneNumber">Phone</label>
+        <input id="phoneNumber" pInputText type="text" formControlName="phoneNumber" />
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input id="email" pInputText type="text" formControlName="email" />
+        <small class="error" *ngIf="form.controls['email'].touched && form.controls['email'].errors?.['email']">
+          Enter a valid email address.
+        </small>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <p-button label="Cancel" styleClass="p-button-text" (onClick)="cancel()"></p-button>
+      <p-button type="submit" [label]="isEdit ? 'Save changes' : 'Create patient'" [loading]="submitting" [disabled]="submitting || form.invalid"></p-button>
+    </div>
+  </form>
+</div>

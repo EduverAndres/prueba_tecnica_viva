@@ -1,0 +1,66 @@
+<div class="detail-container" *ngIf="!loading; else loadingTemplate">
+  <ng-container *ngIf="patient; else notFound">
+    <div class="detail-header">
+      <h2>{{ patient.firstName }} {{ patient.lastName }}</h2>
+      <button pButton label="Back" icon="pi pi-arrow-left" styleClass="p-button-text" (click)="goBack()"></button>
+    </div>
+
+    <p-card>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="label">Document</span>
+          <span class="value">{{ patient.documentType }} — {{ patient.documentNumber }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Birth date</span>
+          <span class="value">{{ patient.birthDate | date: 'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Email</span>
+          <span class="value">{{ patient.email ?? '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Phone</span>
+          <span class="value">{{ patient.phoneNumber ?? '—' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Created at</span>
+          <span class="value">{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </p-card>
+
+    <p-card class="appointments-card">
+      <div class="appointments-header">
+        <h3>Appointments</h3>
+        <span class="mock-note">Mock data — pending integration with an appointments API</span>
+      </div>
+      <p-table [value]="appointments" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Date</th>
+            <th>Doctor</th>
+            <th>Specialty</th>
+            <th>Status</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-appointment>
+          <tr>
+            <td>{{ appointment.date | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ appointment.doctor }}</td>
+            <td>{{ appointment.specialty }}</td>
+            <td>{{ appointment.status }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </ng-container>
+</div>
+
+<ng-template #notFound>
+  <p>Patient not found.</p>
+</ng-template>
+
+<ng-template #loadingTemplate>
+  <p>Loading...</p>
+</ng-template>
