@@ -1,65 +1,99 @@
-<div class="list-container">
-  <div class="list-header">
-    <h2>Patients</h2>
-    <div class="actions">
+<div class="space-y-6">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-900">Patients</h1>
+      <p class="mt-1 text-sm text-slate-500">Manage patient records and consult appointment history.</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
       <button pButton label="Reports" icon="pi pi-file-excel" styleClass="p-button-secondary p-button-outlined" (click)="reportDialog.open()"></button>
       <button pButton label="New patient" icon="pi pi-plus" (click)="createPatient()"></button>
     </div>
   </div>
 
-  <div class="filters">
-    <span class="p-input-icon-left">
-      <i class="pi pi-search"></i>
-      <input pInputText type="text" [(ngModel)]="nameFilter" (ngModelChange)="onSearchInput()" placeholder="Search by name" />
-    </span>
-    <input pInputText type="text" [(ngModel)]="documentNumberFilter" (ngModelChange)="onSearchInput()" placeholder="Document number (exact)" />
-    <button pButton label="Search" icon="pi pi-filter" (click)="searchNow()"></button>
-    <button pButton label="Clear" styleClass="p-button-text" (click)="clearFilters()"></button>
-  </div>
+  <div class="animate-fade-in-up rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
+    <div class="mb-4 grid gap-3 sm:grid-cols-2 lg:flex">
+      <span class="p-input-icon-left w-full">
+        <i class="pi pi-search"></i>
+        <input pInputText type="text" [(ngModel)]="nameFilter" (ngModelChange)="onSearchInput()" placeholder="Search by name" class="w-full" />
+      </span>
+      <span class="w-full">
+        <input pInputText type="text" [(ngModel)]="documentNumberFilter" (ngModelChange)="onSearchInput()" placeholder="Document number (exact)" class="w-full" />
+      </span>
+      <div class="flex items-center gap-2">
+        <button pButton label="Search" icon="pi pi-filter" (click)="searchNow()"></button>
+        <button pButton label="Clear" styleClass="p-button-text" (click)="clearFilters()"></button>
+      </div>
+    </div>
 
-  <p-table
-    [value]="patients"
-    [lazy]="true"
-    [loading]="loading"
-    [paginator]="true"
-    [rows]="pageSize"
-    [totalRecords]="totalRecords"
-    [first]="first"
-    (onLazyLoad)="onLazyLoad($event)"
-    dataKey="patientId"
-    responsiveLayout="scroll">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Document</th>
-        <th>First name</th>
-        <th>Last name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Created at</th>
-        <th style="width: 10rem">Actions</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-patient>
-      <tr>
-        <td>{{ patient.documentType }} — {{ patient.documentNumber }}</td>
-        <td>{{ patient.firstName }}</td>
-        <td>{{ patient.lastName }}</td>
-        <td>{{ patient.email ?? '—' }}</td>
-        <td>{{ patient.phoneNumber ?? '—' }}</td>
-        <td>{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-        <td>
-          <button pButton type="button" icon="pi pi-eye" styleClass="p-button-rounded p-button-text p-button-secondary" [pTooltip]="'View'" (click)="viewPatient(patient)"></button>
-          <button pButton type="button" icon="pi pi-pencil" styleClass="p-button-rounded p-button-text" [pTooltip]="'Edit'" (click)="editPatient(patient)"></button>
-          <button pButton type="button" icon="pi pi-trash" styleClass="p-button-rounded p-button-text p-button-danger" [pTooltip]="'Delete'" (click)="confirmDelete(patient)"></button>
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="7">No patients found.</td>
-      </tr>
-    </ng-template>
-  </p-table>
+    <p-table
+      [value]="patients"
+      [lazy]="true"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="pageSize"
+      [totalRecords]="totalRecords"
+      [first]="first"
+      (onLazyLoad)="onLazyLoad($event)"
+      dataKey="patientId"
+      responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Document</th>
+          <th>First name</th>
+          <th>Last name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Created at</th>
+          <th style="width: 10rem">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-patient>
+        <tr>
+          <td class="whitespace-nowrap">
+            <div class="flex items-center gap-2">
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-sky-100 text-sky-700 ring-sky-200': patient.documentType === 'DNI',
+                  'bg-violet-100 text-violet-700 ring-violet-200': patient.documentType === 'PAS',
+                  'bg-emerald-100 text-emerald-700 ring-emerald-200': patient.documentType === 'CE'
+                }">{{ patient.documentType }}</span>
+              <span class="font-mono text-xs text-slate-600">{{ patient.documentNumber }}</span>
+            </div>
+          </td>
+          <td class="font-medium text-slate-900">{{ patient.firstName }}</td>
+          <td>{{ patient.lastName }}</td>
+          <td>
+            <span [ngClass]="patient.email ? 'text-slate-700' : 'text-slate-400'">{{ patient.email ?? '—' }}</span>
+          </td>
+          <td>
+            <span [ngClass]="patient.phoneNumber ? 'text-slate-700' : 'text-slate-400'">{{ patient.phoneNumber ?? '—' }}</span>
+          </td>
+          <td class="whitespace-nowrap">{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <div class="flex items-center gap-1">
+              <button pButton type="button" icon="pi pi-eye" styleClass="p-button-rounded p-button-text p-button-secondary" [pTooltip]="'View'" (click)="viewPatient(patient)"></button>
+              <button pButton type="button" icon="pi pi-pencil" styleClass="p-button-rounded p-button-text" [pTooltip]="'Edit'" (click)="editPatient(patient)"></button>
+              <button pButton type="button" icon="pi pi-trash" styleClass="p-button-rounded p-button-text p-button-danger" [pTooltip]="'Delete'" [loading]="deletingId === patient.patientId" [disabled]="deletingId !== null" (click)="confirmDelete(patient)"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7">
+            <div class="flex flex-col items-center justify-center gap-2 py-10">
+              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                <i class="pi pi-inbox text-xl text-slate-400"></i>
+              </div>
+              <p class="text-sm font-medium text-slate-700">No patients found</p>
+              <p class="text-sm text-slate-400">Try adjusting your search or clear the filters.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 
   <p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
   <app-report-dialog #reportDialog></app-report-dialog>

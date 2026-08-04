@@ -19,6 +19,7 @@ export class PatientListComponent implements OnInit, OnDestroy {
   pageSize = 10;
   first = 0;
   loading = false;
+  deletingId: number | null = null;
   nameFilter = '';
   documentNumberFilter = '';
 
@@ -111,14 +112,19 @@ export class PatientListComponent implements OnInit, OnDestroy {
   }
 
   private deletePatient(patient: Patient): void {
+    this.deletingId = patient.patientId;
     this.patientsService.deletePatient(patient.patientId).subscribe({
       next: () => {
+        this.deletingId = null;
         this.messageService.add({
           severity: 'success',
           summary: 'Deleted',
           detail: 'Patient deleted successfully.'
         });
         this.resetAndLoad();
+      },
+      error: () => {
+        this.deletingId = null;
       }
     });
   }

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { MessageService } from 'primeng/api';
+import * as XLSX from 'xlsx';
 
 import { Patient } from '../../../../core/models/patient.model';
 import { PatientsService } from '../../../../core/services/patients.service';
@@ -29,7 +30,15 @@ export class ReportDialogComponent {
     this.exporting = false;
   }
 
+  exportExcel(): void {
+    this.fetchAndExport((patients) => this.downloadExcel(patients));
+  }
+
   exportCsv(): void {
+    this.fetchAndExport((patients) => this.downloadCsv(patients));
+  }
+
+  private fetchAndExport(action: (patients: Patient[]) => void): void {
     if (!this.fromDate) {
       return;
     }
@@ -37,7 +46,7 @@ export class ReportDialogComponent {
     this.exporting = true;
     this.patientsService.getPatientsCreatedAfter(toApiDate(this.fromDate)).subscribe({
       next: (patients) => {
-        this.downloadCsv(patients);
+        action(patients);
         this.exporting = false;
         this.messageService.add({
           severity: 'success',
@@ -51,6 +60,29 @@ export class ReportDialogComponent {
     });
   }
 
+  private toRowArray(patient: Patient): (string | number | null)[] {
+    return [
+      patient.patientId,
+      patient.documentType,
+      patient.documentNumber,
+      patient.firstName,
+      patient.lastName,
+      patient.birthDate,
+      patient.phoneNumber,
+      patient.email,
+      patient.createdAt
+    ];
+  }
+
+  private downloadExcel(patients: Patient[]): void {
+    const header = ['PatientId', 'DocumentType', 'DocumentNumber', 'FirstName', 'LastName', 'BirthDate', 'PhoneNumber', 'Email', 'CreatedAt'];
+    const rows = patients.map((p) => this.toRowArray(p));
+    const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Patients');
+    XLSX.writeFile(workbook, `patients-created-after-${toApiDate(this.fromDate!)}.xlsx`);
+  }
+
   private downloadCsv(patients: Patient[]): void {
     const header = ['PatientId', 'DocumentType', 'DocumentNumber', 'FirstName', 'LastName', 'BirthDate', 'PhoneNumber', 'Email', 'CreatedAt'];
     const escape = (value: string | number | null): string => {
@@ -59,9 +91,7 @@ export class ReportDialogComponent {
     };
 
     const rows = patients.map((patient) =>
-      [patient.patientId, patient.documentType, patient.documentNumber, patient.firstName, patient.lastName, patient.birthDate, patient.phoneNumber, patient.email, patient.createdAt]
-        .map(escape)
-        .join(',')
+      this.toRowArray(patient).map(escape).join(',')
     );
 
     const csv = [header.join(','), ...rows].join('\r\n');

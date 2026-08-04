@@ -1,10 +1,29 @@
 <p-dialog [(visible)]="visible" header="Patients report" [modal]="true" [style]="{ width: '420px' }">
-  <div class="report-body">
-    <p>Export patients created after:</p>
-    <p-calendar [(ngModel)]="fromDate" [showIcon]="true" dateFormat="dd/mm/yy" [maxDate]="today" [readonlyInput]="true" placeholder="Select a date"></p-calendar>
+  <div class="p-fluid space-y-5">
+    <div class="flex items-start gap-3 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-100">
+      <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white">
+        <i class="pi pi-file-excel"></i>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-slate-900">Export patient records</p>
+        <p class="mt-1 text-sm leading-relaxed text-slate-600">Patients created after the selected date will be exported as an Excel or CSV file.</p>
+      </div>
+    </div>
+    <div>
+      <label for="reportFromDate" class="mb-1.5 block text-sm font-medium text-slate-700">From date</label>
+      <p-calendar
+        inputId="reportFromDate"
+        [(ngModel)]="fromDate"
+        [showIcon]="true"
+        dateFormat="dd/mm/yy"
+        [maxDate]="today"
+        [readonlyInput]="true"
+        placeholder="Select a date"></p-calendar>
+    </div>
   </div>
   <ng-template pTemplate="footer">
     <button pButton label="Cancel" styleClass="p-button-text" (click)="close()"></button>
-    <button pButton label="Export CSV" icon="pi pi-download" [loading]="exporting" [disabled]="!fromDate || exporting" (click)="exportCsv()"></button>
+    <button pButton label="Export CSV" icon="pi pi-file-csv" [loading]="exporting" [disabled]="!fromDate || exporting" (click)="exportCsv()"></button>
+    <button pButton label="Export Excel" icon="pi pi-file-excel" [loading]="exporting" [disabled]="!fromDate || exporting" (click)="exportExcel()"></button>
   </ng-template>
 </p-dialog>

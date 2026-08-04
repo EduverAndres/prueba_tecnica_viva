@@ -1,9 +1,23 @@
 <p-toast position="top-right"></p-toast>
 
-<header class="app-header">
-  <span class="app-title">Patients — Management</span>
+<header class="sticky top-0 z-40 border-b border-white/10 bg-slate-900/85 backdrop-blur">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-3">
+      <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-lg font-bold text-white shadow-lg shadow-sky-950/40">
+        P
+      </div>
+      <div class="leading-tight">
+        <span class="app-title block text-lg font-semibold tracking-tight text-white">Patients — Management</span>
+        <span class="hidden text-xs text-slate-400 sm:block">Patient records &amp; appointments</span>
+      </div>
+    </div>
+    <span class="inline-flex items-center gap-2 rounded-full bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-300 ring-1 ring-inset ring-sky-400/20">
+      <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+      Clinical data
+    </span>
+  </div>
 </header>
 
-<main class="app-main">
+<main class="animate-fade-in mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
   <router-outlet></router-outlet>
 </main>

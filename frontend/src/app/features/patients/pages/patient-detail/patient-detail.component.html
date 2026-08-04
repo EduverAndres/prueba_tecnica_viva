@@ -1,66 +1,118 @@
-<div class="detail-container" *ngIf="!loading; else loadingTemplate">
+<div *ngIf="!loading; else loadingTemplate">
   <ng-container *ngIf="patient; else notFound">
-    <div class="detail-header">
-      <h2>{{ patient.firstName }} {{ patient.lastName }}</h2>
-      <button pButton label="Back" icon="pi pi-arrow-left" styleClass="p-button-text" (click)="goBack()"></button>
+    <div class="mx-auto max-w-5xl">
+      <div class="flex items-center justify-between">
+        <button pButton label="Back" icon="pi pi-arrow-left" styleClass="p-button-text" (click)="goBack()"></button>
+      </div>
+
+      <div class="animate-fade-in-up mt-4 flex items-center gap-4">
+        <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-xl font-bold text-white shadow-lg shadow-sky-950/40">
+          {{ patient.firstName.charAt(0) }}{{ patient.lastName.charAt(0) }}
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ patient.firstName }} {{ patient.lastName }}</h1>
+            <span
+              class="badge"
+              [ngClass]="{
+                'bg-sky-100 text-sky-700 ring-sky-200': patient.documentType === 'DNI',
+                'bg-violet-100 text-violet-700 ring-violet-200': patient.documentType === 'PAS',
+                'bg-emerald-100 text-emerald-700 ring-emerald-200': patient.documentType === 'CE'
+              }">{{ patient.documentType }}</span>
+          </div>
+          <p class="mt-1 text-sm text-slate-500">Patient record details and appointment history.</p>
+        </div>
+      </div>
+
+      <div class="animate-fade-in-up mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="rounded-xl bg-slate-50 p-4">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Document</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.documentType }} — {{ patient.documentNumber }}</span>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-4">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Birth date</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.birthDate | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-4">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Email</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.email ?? '—' }}</span>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-4">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Phone</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.phoneNumber ?? '—' }}</span>
+          </div>
+          <div class="rounded-xl bg-slate-50 p-4">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Created at</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="animate-fade-in-up mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 class="text-lg font-semibold text-slate-900">Appointments</h2>
+          <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
+            Mock data — pending integration with an appointments API
+          </span>
+        </div>
+        <p-table [value]="appointments" responsiveLayout="scroll">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Date</th>
+              <th>Doctor</th>
+              <th>Specialty</th>
+              <th>Status</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-appointment>
+            <tr>
+              <td class="whitespace-nowrap">{{ appointment.date | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="font-medium text-slate-900">{{ appointment.doctor }}</td>
+              <td>{{ appointment.specialty }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'bg-emerald-100 text-emerald-700 ring-emerald-200': appointment.status === 'Completed',
+                    'bg-sky-100 text-sky-700 ring-sky-200': appointment.status === 'Scheduled',
+                    'bg-rose-100 text-rose-700 ring-rose-200': appointment.status === 'Cancelled'
+                  }">{{ appointment.status }}</span>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
     </div>
-
-    <p-card>
-      <div class="detail-grid">
-        <div class="detail-item">
-          <span class="label">Document</span>
-          <span class="value">{{ patient.documentType }} — {{ patient.documentNumber }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Birth date</span>
-          <span class="value">{{ patient.birthDate | date: 'dd/MM/yyyy' }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Email</span>
-          <span class="value">{{ patient.email ?? '—' }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Phone</span>
-          <span class="value">{{ patient.phoneNumber ?? '—' }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Created at</span>
-          <span class="value">{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-      </div>
-    </p-card>
-
-    <p-card class="appointments-card">
-      <div class="appointments-header">
-        <h3>Appointments</h3>
-        <span class="mock-note">Mock data — pending integration with an appointments API</span>
-      </div>
-      <p-table [value]="appointments" responsiveLayout="scroll">
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Date</th>
-            <th>Doctor</th>
-            <th>Specialty</th>
-            <th>Status</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-appointment>
-          <tr>
-            <td>{{ appointment.date | date: 'dd/MM/yyyy HH:mm' }}</td>
-            <td>{{ appointment.doctor }}</td>
-            <td>{{ appointment.specialty }}</td>
-            <td>{{ appointment.status }}</td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </p-card>
   </ng-container>
 </div>
 
 <ng-template #notFound>
-  <p>Patient not found.</p>
+  <div class="mx-auto max-w-5xl">
+    <div class="animate-fade-in-up rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-slate-200">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+        <i class="pi pi-exclamation-triangle text-2xl text-slate-400"></i>
+      </div>
+      <h2 class="mt-4 text-lg font-semibold text-slate-900">Patient not found</h2>
+      <p class="mt-1 text-sm text-slate-500">The patient record does not exist or was removed.</p>
+      <button pButton label="Back to patients" icon="pi pi-arrow-left" styleClass="p-button-text mt-4" (click)="goBack()"></button>
+    </div>
+  </div>
 </ng-template>
 
 <ng-template #loadingTemplate>
-  <p>Loading...</p>
+  <div class="mx-auto max-w-5xl">
+    <div class="flex items-center justify-between">
+      <button pButton label="Back" icon="pi pi-arrow-left" styleClass="p-button-text" (click)="goBack()"></button>
+    </div>
+    <div class="mt-4 flex animate-fade-in items-center gap-4">
+      <div class="skeleton h-16 w-16 rounded-full"></div>
+      <div class="space-y-2">
+        <div class="skeleton h-6 w-56"></div>
+        <div class="skeleton h-4 w-72"></div>
+      </div>
+    </div>
+    <div class="skeleton mt-6 h-44 w-full"></div>
+    <div class="skeleton mt-6 h-56 w-full"></div>
+  </div>
 </ng-template>
