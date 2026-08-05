@@ -140,10 +140,4 @@ Las respuestas de error usan una forma consistente: `{ "message": "...", "detail
 - **Endpoint de estadísticas**: el `GroupBy` de EF Core se traduce a `GROUP BY` nativo de SQL; el servicio completa la ventana de 12 meses con ceros para que el eje del gráfico sea estable.
 - **Frontend**: paginación diferida en servidor con búsqueda con debounce; `ConfirmationService` de PrimeNG para acciones destructivas; exportación CSV y Excel basada en el procedimiento almacenado `created-after`; gráfico de barras solo con CSS (sin librería de gráficos); modo oscuro mediante el tema `lara-dark-blue` de PrimeNG activado con un `<link>` en tiempo de ejecución y variantes `dark:` de Tailwind; barra de progreso indeterminada global impulsada por el interceptor HTTP.
 
-## Capturas de pantalla
 
-- Dashboard: *(agregar captura)*
-- Listado de pacientes: *(agregar captura)*
-- Formulario de paciente: *(agregar captura)*
-- Detalle de paciente: *(agregar captura)*
-- Modo oscuro: *(agregar captura)*
