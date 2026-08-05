@@ -14,6 +14,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { of } from 'rxjs';
 
 import { PagedPatients, Patient } from '../../../../core/models/patient.model';
+import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { PatientsService } from '../../../../core/services/patients.service';
 import { ReportDialogComponent } from '../report-dialog/report-dialog.component';
 import { PatientListComponent } from './patient-list.component';
@@ -62,7 +63,7 @@ describe('PatientListComponent', () => {
     service.getPatients.and.returnValue(of(paged));
 
     await TestBed.configureTestingModule({
-      declarations: [PatientListComponent, ReportDialogComponent],
+      declarations: [PatientListComponent, ReportDialogComponent, TranslatePipe],
       imports: [
         NoopAnimationsModule,
         FormsModule,

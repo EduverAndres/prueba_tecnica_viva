@@ -1,8 +1,8 @@
-<div *ngIf="!loading; else loadingTemplate">
+﻿<div *ngIf="!loading; else loadingTemplate">
   <ng-container *ngIf="patient; else notFound">
     <div class="mx-auto max-w-5xl">
       <div class="flex items-center justify-between">
-        <button pButton label="Back" icon="pi pi-arrow-left" styleClass="p-button-text" (click)="goBack()"></button>
+        <button pButton [label]="'patients.detail.back' | translate" icon="pi pi-arrow-left" styleClass="p-button-text" (click)="goBack()"></button>
       </div>
 
       <div class="animate-fade-in-up mt-4 flex items-center gap-4">
@@ -11,7 +11,7 @@
         </div>
         <div>
           <div class="flex flex-wrap items-center gap-2">
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ patient.firstName }} {{ patient.lastName }}</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ patient.firstName }} {{ patient.lastName }}</h1>
             <span
               class="badge"
               [ngClass]="{
@@ -20,55 +20,55 @@
                 'bg-emerald-100 text-emerald-700 ring-emerald-200': patient.documentType === 'CE'
               }">{{ patient.documentType }}</span>
           </div>
-          <p class="mt-1 text-sm text-slate-500">Patient record details and appointment history.</p>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ 'patients.detail.subtitle' | translate }}</p>
         </div>
       </div>
 
-      <div class="animate-fade-in-up mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <div class="animate-fade-in-up mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div class="rounded-xl bg-slate-50 p-4">
-            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Document</span>
-            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.documentType }} — {{ patient.documentNumber }}</span>
+          <div class="rounded-xl bg-slate-50 p-4 dark:bg-slate-900/60">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ 'patients.detail.document' | translate }}</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900 dark:text-slate-100">{{ patient.documentType }} — {{ patient.documentNumber }}</span>
           </div>
-          <div class="rounded-xl bg-slate-50 p-4">
-            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Birth date</span>
-            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.birthDate | date: 'dd/MM/yyyy' }}</span>
+          <div class="rounded-xl bg-slate-50 p-4 dark:bg-slate-900/60">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ 'patients.detail.birthDate' | translate }}</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900 dark:text-slate-100">{{ patient.birthDate | date: 'dd/MM/yyyy' }}</span>
           </div>
-          <div class="rounded-xl bg-slate-50 p-4">
-            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Email</span>
-            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.email ?? '—' }}</span>
+          <div class="rounded-xl bg-slate-50 p-4 dark:bg-slate-900/60">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ 'patients.detail.email' | translate }}</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900 dark:text-slate-100">{{ patient.email ?? '—' }}</span>
           </div>
-          <div class="rounded-xl bg-slate-50 p-4">
-            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Phone</span>
-            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.phoneNumber ?? '—' }}</span>
+          <div class="rounded-xl bg-slate-50 p-4 dark:bg-slate-900/60">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ 'patients.detail.phone' | translate }}</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900 dark:text-slate-100">{{ patient.phoneNumber ?? '—' }}</span>
           </div>
-          <div class="rounded-xl bg-slate-50 p-4">
-            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400">Created at</span>
-            <span class="mt-1 block text-sm font-semibold text-slate-900">{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+          <div class="rounded-xl bg-slate-50 p-4 dark:bg-slate-900/60">
+            <span class="block text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{{ 'patients.detail.createdAt' | translate }}</span>
+            <span class="mt-1 block text-sm font-semibold text-slate-900 dark:text-slate-100">{{ patient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
           </div>
         </div>
       </div>
 
-      <div class="animate-fade-in-up mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+      <div class="animate-fade-in-up mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h2 class="text-lg font-semibold text-slate-900">Appointments</h2>
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-white">{{ 'patients.detail.appointments.title' | translate }}</h2>
           <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-200">
-            Mock data — pending integration with an appointments API
+            {{ 'patients.detail.appointments.mock' | translate }}
           </span>
         </div>
         <p-table [value]="appointments" responsiveLayout="scroll">
           <ng-template pTemplate="header">
             <tr>
-              <th>Date</th>
-              <th>Doctor</th>
-              <th>Specialty</th>
-              <th>Status</th>
+              <th>{{ 'patients.detail.th.date' | translate }}</th>
+              <th>{{ 'patients.detail.th.doctor' | translate }}</th>
+              <th>{{ 'patients.detail.th.specialty' | translate }}</th>
+              <th>{{ 'patients.detail.th.status' | translate }}</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-appointment>
             <tr>
               <td class="whitespace-nowrap">{{ appointment.date | date: 'dd/MM/yyyy HH:mm' }}</td>
-              <td class="font-medium text-slate-900">{{ appointment.doctor }}</td>
+              <td class="font-medium text-slate-900 dark:text-slate-100">{{ appointment.doctor }}</td>
               <td>{{ appointment.specialty }}</td>
               <td>
                 <span
@@ -77,7 +77,7 @@
                     'bg-emerald-100 text-emerald-700 ring-emerald-200': appointment.status === 'Completed',
                     'bg-sky-100 text-sky-700 ring-sky-200': appointment.status === 'Scheduled',
                     'bg-rose-100 text-rose-700 ring-rose-200': appointment.status === 'Cancelled'
-                  }">{{ appointment.status }}</span>
+                  }">{{ statusKey(appointment.status) | translate }}</span>
               </td>
             </tr>
           </ng-template>
@@ -90,12 +90,12 @@
 <ng-template #notFound>
   <div class="mx-auto max-w-5xl">
     <div class="animate-fade-in-up rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-slate-200">
-      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
         <i class="pi pi-exclamation-triangle text-2xl text-slate-400"></i>
       </div>
-      <h2 class="mt-4 text-lg font-semibold text-slate-900">Patient not found</h2>
-      <p class="mt-1 text-sm text-slate-500">The patient record does not exist or was removed.</p>
-      <button pButton label="Back to patients" icon="pi pi-arrow-left" styleClass="p-button-text mt-4" (click)="goBack()"></button>
+      <h2 class="mt-4 text-lg font-semibold text-slate-900 dark:text-white">{{ 'patients.detail.notFound.title' | translate }}</h2>
+      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ 'patients.detail.notFound.subtitle' | translate }}</p>
+      <button pButton [label]="'patients.detail.backToList' | translate" icon="pi pi-arrow-left" styleClass="p-button-text mt-4" (click)="goBack()"></button>
     </div>
   </div>
 </ng-template>
@@ -103,7 +103,7 @@
 <ng-template #loadingTemplate>
   <div class="mx-auto max-w-5xl">
     <div class="flex items-center justify-between">
-      <button pButton label="Back" icon="pi pi-arrow-left" styleClass="p-button-text" (click)="goBack()"></button>
+      <button pButton [label]="'patients.detail.back' | translate" icon="pi pi-arrow-left" styleClass="p-button-text" (click)="goBack()"></button>
     </div>
     <div class="mt-4 flex animate-fade-in items-center gap-4">
       <div class="skeleton h-16 w-16 rounded-full"></div>

@@ -1,37 +1,37 @@
 # Patients API — Backend
 
-RESTful API for patient management built with **.NET 8 (LTS)**, **Entity Framework Core 8** and **SQL Server**, exposed with Swagger/OpenAPI and covered by xUnit tests.
+API RESTful para la gestión de pacientes construida con **.NET 8 (LTS)**, **Entity Framework Core 8** y **SQL Server**, expuesta con Swagger/OpenAPI y cubierta con pruebas xUnit.
 
-## Requirements
+## Requisitos
 
-- .NET SDK 8.0 (`global.json` at the repo root pins `8.0.423`, roll-forward to the latest feature band)
-- SQL Server 2019+ (a local/remote instance; see "Database setup" below)
-- `dotnet-ef` CLI (optional, only if you want to run migrations by hand):
+- .NET SDK 8.0 (`global.json` en la raíz del repositorio fija `8.0.423`, con roll-forward a la banda de características más reciente)
+- SQL Server 2019+ (una instancia local o remota; ver "Configuración de la base de datos" más abajo)
+- CLI `dotnet-ef` (opcional, solo si se quieren ejecutar las migraciones manualmente):
   `dotnet tool install --global dotnet-ef`
 
-## Project structure
+## Estructura del proyecto
 
 ```
 backend/
   Patients.sln
   src/
-    Patients.Domain/          Entities (no dependencies)
-    Patients.Application/     DTOs, validators (FluentValidation), service layer, repository interface
-    Patients.Infrastructure/  EF Core DbContext, repository (incl. stored procedure call), migrations
-    Patients.Api/             Controllers, global exception middleware, Swagger, DI composition root
+    Patients.Domain/          Entidades (sin dependencias)
+    Patients.Application/     DTOs, validadores (FluentValidation), capa de servicios, interfaz de repositorio
+    Patients.Infrastructure/  DbContext de EF Core, repositorio (incluye llamada al procedimiento almacenado), migraciones
+    Patients.Api/             Controladores, middleware global de excepciones, Swagger, composición raíz de DI
   tests/
     Patients.Tests/           xUnit + Moq + EF Core InMemory
 ```
 
-Dependency direction: `Api → Application → Domain` and `Api → Infrastructure → Application → Domain`. The API project never touches EF Core or the database directly; everything goes through `IPatientService` and `IPatientRepository`.
+Dirección de dependencias: `Api → Application → Domain` y `Api → Infrastructure → Application → Domain`. El proyecto de la API nunca toca EF Core ni la base de datos directamente; todo pasa por `IPatientService` e `IPatientRepository`.
 
-## Installation and configuration
+## Instalación y configuración
 
 ```powershell
 dotnet restore backend/Patients.sln
 ```
 
-Set the connection string in `backend/src/Patients.Api/appsettings.json` (or via the `ConnectionStrings__PatientsDb` environment variable):
+Configurar la cadena de conexión en `backend/src/Patients.Api/appsettings.json` (o mediante la variable de entorno `ConnectionStrings__PatientsDb`):
 
 ```json
 "ConnectionStrings": {
@@ -39,104 +39,105 @@ Set the connection string in `backend/src/Patients.Api/appsettings.json` (or via
 }
 ```
 
-For SQL Server authentication use `User Id=...;Password=...` instead of `Trusted_Connection=True`.
+Para autenticación de SQL Server usar `User Id=...;Password=...` en lugar de `Trusted_Connection=True`.
 
-## Database setup
+## Configuración de la base de datos
 
-Two equivalent paths are provided; pick one (do not run both against the same database):
+Hay dos rutas equivalentes; elija una (no ejecute ambas contra la misma base de datos):
 
-**Option A — SQL scripts (Database-First style)**
+**Opción A — Scripts SQL (estilo Database-First)**
 
-1. `sqlcmd -S localhost -i database/schema.sql` — creates `PatientsDB`, the `Patients` table, the `UNIQUE` constraint on `(DocumentType, DocumentNumber)` and the default for `CreatedAt` (`SYSUTCDATETIME()`).
-2. `sqlcmd -S localhost -i database/sp_GetPatientsCreatedAfter.sql` — creates the stored procedure.
-3. `sqlcmd -S localhost -i database/seed.sql` — optional sample data.
+1. `sqlcmd -S localhost -i database/schema.sql` — crea `PatientsDB`, la tabla `Patients`, la restricción `UNIQUE` sobre `(DocumentType, DocumentNumber)` y el valor por defecto de `CreatedAt` (`SYSUTCDATETIME()`).
+2. `sqlcmd -S localhost -i database/sp_GetPatientsCreatedAfter.sql` — crea el procedimiento almacenado.
+3. `sqlcmd -S localhost -i database/seed.sql` — datos de ejemplo (opcional).
 
-**Option B — EF Core migrations (Code-First)**
+**Opción B — Migraciones de EF Core (Code-First)**
 
 ```powershell
 dotnet ef database update --project backend/src/Patients.Infrastructure --startup-project backend/src/Patients.Api
 ```
 
-The initial migration (`InitialCreate`) creates the same table, the same `UX_Patients_Document` unique index and embeds the stored procedure creation, so `database update` yields an identical schema to Option A. If you later change the EF model, run `dotnet ef migrations add <Name>` and keep `/database/schema.sql` and `sp_GetPatientsCreatedAfter.sql` in sync manually.
+La migración inicial (`InitialCreate`) crea la misma tabla, el mismo índice único `UX_Patients_Document` e incluye la creación del procedimiento almacenado, de modo que `database update` produce un esquema idéntico al de la Opción A. Si luego se modifica el modelo de EF, ejecutar `dotnet ef migrations add <Nombre>` y mantener en sincronía `/database/schema.sql` y `sp_GetPatientsCreatedAfter.sql` manualmente.
 
-The stored procedure `dbo.sp_GetPatientsCreatedAfter (@CreatedAfter DATETIME2)` returns all patients created strictly after the given date, ordered by `CreatedAt`. It is invoked from EF Core with `FromSqlRaw` in `PatientRepository.GetCreatedAfterAsync`.
+El procedimiento almacenado `dbo.sp_GetPatientsCreatedAfter (@CreatedAfter DATETIME2)` devuelve todos los pacientes creados estrictamente después de la fecha dada, ordenados por `CreatedAt`. Se invoca desde EF Core con `FromSqlRaw` en `PatientRepository.GetCreatedAfterAsync`.
 
-## Run the API locally
+## Ejecutar la API localmente
 
 ```powershell
 dotnet run --project backend/src/Patients.Api
 ```
 
-- HTTP: http://localhost:5000 — Swagger UI at `/swagger`
+- HTTP: http://localhost:5000 — Swagger UI en `/swagger`
 - HTTPS: https://localhost:5001
 
-The API starts without a database connection; requests that touch the database will fail until the DB is set up and reachable.
+La API inicia sin conexión a la base de datos; las peticiones que tocan la base de datos fallarán hasta que la BD esté configurada y sea accesible.
 
-## Run the tests
+## Ejecutar las pruebas
 
 ```powershell
 dotnet test backend/Patients.sln
 ```
 
-Tests use EF Core **InMemory** (service/repository layer) and **Moq** (controllers), so they run without SQL Server.
+Las pruebas usan EF Core **InMemory** (capa de servicios/repositorio) y **Moq** (controladores), por lo que se ejecutan sin SQL Server.
 
-## Architecture and technical decisions
+## Arquitectura y decisiones técnicas
 
-### Layered architecture
+### Arquitectura por capas
 
-- **Domain** holds the `Patient` entity only. It is a persistence-agnostic model, so business logic never leaks into EF Core.
-- **Application** owns the use cases (`PatientService`), the DTOs and FluentValidation validators, and defines `IPatientRepository` (an interface the infrastructure implements). This keeps the API decoupled from storage details and makes the service trivially testable.
-- **Infrastructure** implements persistence: `PatientsDbContext`, EF Core configuration, the repository (including the `FromSqlRaw` call to the stored procedure) and the migrations.
-- **Api** is the composition root: controllers, DI wiring, Swagger and the global exception middleware.
+- **Domain** contiene solo la entidad `Patient`. Es un modelo agnóstico de la persistencia, de modo que la lógica de negocio nunca se filtra a EF Core.
+- **Application** posee los casos de uso (`PatientService`), los DTOs y los validadores FluentValidation, y define `IPatientRepository` (una interfaz que implementa la infraestructura). Esto mantiene la API desacoplada de los detalles de almacenamiento y hace que el servicio sea trivialmente testeable.
+- **Infrastructure** implementa la persistencia: `PatientsDbContext`, configuración de EF Core, el repositorio (incluida la llamada `FromSqlRaw` al procedimiento almacenado) y las migraciones.
+- **Api** es la composición raíz: controladores, cableado de DI, Swagger y el middleware global de excepciones.
 
-Why this split: it gives a single, well-defined seam for testing (`IPatientRepository`), keeps EF Core out of the controllers, and makes the schema definition visible in one place.
+Por qué esta división: proporciona una única costura bien definida para las pruebas (`IPatientRepository`), mantiene EF Core fuera de los controladores y hace visible la definición del esquema en un solo lugar.
 
-### PUT semantics — full (total) update
+### Semántica de PUT — actualización total
 
-`PUT /api/patients/{id}` performs a **total replacement** of the editable fields (document, names, birth date, phone, email). This follows HTTP semantics: `PUT` replaces the resource; `PATCH` is the verb for partial updates. The frontend always sends the complete form, so no endpoint for partial updates is exposed.
+`PUT /api/patients/{id}` realiza un **reemplazo total** de los campos editables (documento, nombres, fecha de nacimiento, teléfono, correo). Esto sigue la semántica HTTP: `PUT` reemplaza el recurso; `PATCH` es el verbo para actualizaciones parciales. El frontend siempre envía el formulario completo, por lo que no se expone ningún endpoint de actualización parcial.
 
-### Duplicate document validation `(DocumentType, DocumentNumber)`
+### Validación de documentos duplicados `(DocumentType, DocumentNumber)`
 
-Two layers defend the business rule:
+Dos capas defienden la regla de negocio:
 
-1. **Application layer** — `PatientService` checks `ExistsAsync` before create/update and throws `DuplicatePatientException`, which the middleware maps to **409 Conflict** with a `message`.
-2. **Database** — the `UX_Patients_Document` unique index is the final authority. `PatientRepository.SaveChangesAsync` detects SQL Server error 2601/2627 (unique constraint violation) and converts it to the same `DuplicatePatientException`, covering concurrent requests (the check-then-insert race).
+1. **Capa de aplicación** — `PatientService` verifica `ExistsAsync` antes de crear/actualizar y lanza `DuplicatePatientException`, que el middleware mapea a **409 Conflict** con un `message`.
+2. **Base de datos** — el índice único `UX_Patients_Document` es la autoridad final. `PatientRepository.SaveChangesAsync` detecta los errores 2601/2627 de SQL Server (violación de restricción única) y los convierte en la misma `DuplicatePatientException`, cubriendo peticiones concurrentes (la carrera verificar-luego-insertar).
 
-### Validation
+### Validación
 
-FluentValidation (`CreatePatientValidator`, `UpdatePatientValidator`) validates required fields, max lengths, a non-future `BirthDate`, and the `Email` format. A failed validation produces **400** with `{ message: "Validation failed.", details: [ ... ] }`.
+FluentValidation (`CreatePatientValidator`, `UpdatePatientValidator`) valida campos obligatorios, longitudes máximas, una `BirthDate` no futura y el formato de `Email`. Una validación fallida produce **400** con `{ message: "Validation failed.", details: [ ... ] }`.
 
-### Consistent error handling
+### Manejo consistente de errores
 
-`GlobalExceptionMiddleware` is the single place that converts exceptions into responses:
+`GlobalExceptionMiddleware` es el único lugar que convierte excepciones en respuestas:
 
-| Exception | HTTP status | Body |
+| Excepción | Estado HTTP | Cuerpo |
 |---|---|---|
 | `PatientNotFoundException` | 404 | `{ message }` |
 | `DuplicatePatientException` | 409 | `{ message }` |
-| FluentValidation `ValidationException` | 400 | `{ message, details[] }` |
-| Anything else | 500 | `{ message: "An unexpected error occurred." }` (logged) |
+| `ValidationException` de FluentValidation | 400 | `{ message, details[] }` |
+| Cualquier otra | 500 | `{ message: "An unexpected error occurred." }` (registrada) |
 
 ### CreatedAt
 
-The API sets `CreatedAt = DateTime.UtcNow` in the service so tests and runtime behave identically; the column keeps a `SYSUTCDATETIME()` default for rows inserted outside EF (e.g. `seed.sql`).
+La API establece `CreatedAt = DateTime.UtcNow` en el servicio para que las pruebas y el runtime se comporten de forma idéntica; la columna conserva un valor por defecto `SYSUTCDATETIME()` para filas insertadas fuera de EF (por ejemplo, `seed.sql`).
 
-### Pagination and filters
+### Paginación y filtros
 
-`GET /api/patients` supports server-side pagination: `page` (≥ 1), `pageSize` (1–100, default 10), `name` (contains, over `FirstName`/`LastName` — case-insensitive on SQL Server) and `documentNumber` (exact). The response includes `totalCount`, `page`, `pageSize` and `totalPages`, which the Angular frontend uses for its lazy table.
+`GET /api/patients` admite paginación en servidor: `page` (≥ 1), `pageSize` (1–100, por defecto 10), `name` (contiene, sobre `FirstName`/`LastName` — sin distinción de mayúsculas en SQL Server) y `documentNumber` (exacto). La respuesta incluye `totalCount`, `page`, `pageSize` y `totalPages`, que el frontend Angular usa para su tabla perezosa.
 
 ## Endpoints
 
-| Method | Route | Description | Success | Errors |
+| Método | Ruta | Descripción | Éxito | Errores |
 |---|---|---|---|---|
-| POST | `/api/patients` | Create a patient | 201 + patient | 400 validation, 409 duplicate document |
-| GET | `/api/patients` | Paged list with `page`, `pageSize`, `name`, `documentNumber` filters | 200 paged result | 400 invalid paging |
-| GET | `/api/patients/{id}` | Get one patient | 200 + patient | 404 |
-| PUT | `/api/patients/{id}` | Full update | 200 + patient | 400, 404, 409 |
-| DELETE | `/api/patients/{id}` | Delete a patient | 204 | 404 |
-| GET | `/api/patients/created-after?from=2024-01-01` | Patients created after a date (stored procedure) | 200 list | 400 missing `from` |
+| POST | `/api/patients` | Crear un paciente | 201 + paciente | 400 validación, 409 documento duplicado |
+| GET | `/api/patients` | Listado paginado con filtros `page`, `pageSize`, `name`, `documentNumber` | 200 resultado paginado | 400 paginación inválida |
+| GET | `/api/patients/{id}` | Obtener un paciente | 200 + paciente | 404 |
+| PUT | `/api/patients/{id}` | Actualización total | 200 + paciente | 400, 404, 409 |
+| DELETE | `/api/patients/{id}` | Eliminar un paciente | 204 | 404 |
+| GET | `/api/patients/created-after?from=2024-01-01` | Pacientes creados después de una fecha (procedimiento almacenado) | 200 lista | 400 falta `from` |
+| GET | `/api/patients/stats` | Totales + conteos mensuales (ventana de 12 meses) | 200 estadísticas | — |
 
-Request body example (create/update):
+Ejemplo de cuerpo de petición (crear/actualizar):
 
 ```json
 {
@@ -150,10 +151,10 @@ Request body example (create/update):
 }
 ```
 
-## Test coverage
+## Cobertura de pruebas
 
-- `PatientServiceTests` — create success, duplicate rejection, paging + filters (contains/exact), update (keep own document, not found, duplicate by another patient), delete (success/not found).
-- `PatientsControllerTests` — status codes and response shapes for all endpoints (Moq).
-- `GlobalExceptionMiddlewareTests` — exception-to-HTTP mapping (404/409/400/500).
+- `PatientServiceTests` — creación exitosa, rechazo de duplicados, paginación + filtros (contiene/exacto), actualización (conservar el propio documento, no encontrado, duplicado por otro paciente), eliminación (éxito/no encontrado), estadísticas (totales, ventana de 12 meses, exclusión de pacientes antiguos).
+- `PatientsControllerTests` — códigos de estado y formas de respuesta de todos los endpoints (Moq).
+- `GlobalExceptionMiddlewareTests` — mapeo excepción-a-HTTP (404/409/400/500).
 
-The `FromSqlRaw` stored procedure path is covered end-to-end only against a real SQL Server (EF InMemory does not support raw SQL).
+La ruta del procedimiento almacenado con `FromSqlRaw` se cubre de extremo a extremo solo contra un SQL Server real (EF InMemory no admite SQL sin procesar).

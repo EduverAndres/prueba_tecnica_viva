@@ -12,6 +12,8 @@ public interface IPatientRepository
 
     Task<IReadOnlyList<Patient>> GetCreatedAfterAsync(DateTime createdAfter, CancellationToken cancellationToken = default);
 
+    Task<(int Total, int Last30Days, IReadOnlyList<(int Year, int Month, int Count)> ByMonth)> GetStatsAsync(CancellationToken cancellationToken = default);
+
     Task<Patient> AddAsync(Patient patient, CancellationToken cancellationToken = default);
 
     void Update(Patient patient);

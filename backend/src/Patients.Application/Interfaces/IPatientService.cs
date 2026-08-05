@@ -15,4 +15,6 @@ public interface IPatientService
     Task DeleteAsync(int id, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<PatientResponse>> GetCreatedAfterAsync(DateTime createdAfter, CancellationToken cancellationToken = default);
+
+    Task<PatientsStatsResponse> GetStatsAsync(CancellationToken cancellationToken = default);
 }

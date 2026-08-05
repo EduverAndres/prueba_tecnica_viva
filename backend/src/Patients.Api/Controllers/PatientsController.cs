@@ -96,4 +96,11 @@ public class PatientsController : ControllerBase
 
         return Ok(await _service.GetCreatedAfterAsync(utcFrom, cancellationToken));
     }
+
+    [HttpGet("stats")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PatientsStatsResponse))]
+    public async Task<ActionResult<PatientsStatsResponse>> GetStats(CancellationToken cancellationToken)
+    {
+        return Ok(await _service.GetStatsAsync(cancellationToken));
+    }
 }

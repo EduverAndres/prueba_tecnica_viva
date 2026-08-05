@@ -1,3 +1,4 @@
+using FluentValidation;
 using Patients.Application.DTOs;
 using Patients.Application.Exceptions;
 using Patients.Application.Interfaces;
@@ -10,14 +11,23 @@ public class PatientService : IPatientService
     private const int MaxPageSize = 100;
 
     private readonly IPatientRepository _repository;
+    private readonly IValidator<CreatePatientRequest> _createValidator;
+    private readonly IValidator<UpdatePatientRequest> _updateValidator;
 
-    public PatientService(IPatientRepository repository)
+    public PatientService(
+        IPatientRepository repository,
+        IValidator<CreatePatientRequest> createValidator,
+        IValidator<UpdatePatientRequest> updateValidator)
     {
         _repository = repository;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
     }
 
     public async Task<PatientResponse> CreateAsync(CreatePatientRequest request, CancellationToken cancellationToken = default)
     {
+        await _createValidator.ValidateAndThrowAsync(request, cancellationToken);
+
         await EnsureDocumentIsUniqueAsync(request.DocumentType, request.DocumentNumber, null, cancellationToken);
 
         var patient = new Patient
@@ -62,6 +72,8 @@ public class PatientService : IPatientService
 
     public async Task<PatientResponse> UpdateAsync(int id, UpdatePatientRequest request, CancellationToken cancellationToken = default)
     {
+        await _updateValidator.ValidateAndThrowAsync(request, cancellationToken);
+
         var patient = await _repository.GetByIdAsync(id, cancellationToken)
             ?? throw new PatientNotFoundException(id);
 
@@ -94,6 +106,31 @@ public class PatientService : IPatientService
     {
         var patients = await _repository.GetCreatedAfterAsync(createdAfter, cancellationToken);
         return patients.Select(PatientResponse.FromEntity).ToList();
+    }
+
+    public async Task<PatientsStatsResponse> GetStatsAsync(CancellationToken cancellationToken = default)
+    {
+        var (total, last30Days, byMonth) = await _repository.GetStatsAsync(cancellationToken);
+
+        // Build the trailing 12-month window (oldest to newest, ending in the
+        // current UTC month) and fill missing months with zero so the dashboard
+        // chart always renders a complete, stable axis.
+        var byMonthLookup = byMonth.ToDictionary(
+            x => (x.Year, x.Month),
+            x => x.Count);
+
+        var windowStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AddMonths(-11);
+        var months = Enumerable.Range(0, 12)
+            .Select(offset =>
+            {
+                var month = windowStart.AddMonths(offset);
+                return new MonthlyPatientCount(
+                    month.ToString("yyyy-MM"),
+                    byMonthLookup.GetValueOrDefault((month.Year, month.Month)));
+            })
+            .ToList();
+
+        return new PatientsStatsResponse(total, last30Days, months);
     }
 
     private async Task EnsureDocumentIsUniqueAsync(string documentType, string documentNumber, int? excludePatientId, CancellationToken cancellationToken)

@@ -3,11 +3,13 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { ToastModule } from 'primeng/toast';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
+import { SharedModule } from './shared/shared.module';
 
 @NgModule({
   declarations: [
@@ -18,7 +20,9 @@ import { CoreModule } from './core/core.module';
     BrowserAnimationsModule,
     HttpClientModule,
     ToastModule,
+    ProgressBarModule,
     CoreModule,
+    SharedModule,
     AppRoutingModule
   ],
   providers: [MessageService],

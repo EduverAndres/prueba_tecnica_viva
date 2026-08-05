@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { PagedPatients, Patient, PatientPayload, PatientQuery } from '../models/patient.model';
+import { PagedPatients, Patient, PatientPayload, PatientQuery, PatientsStats } from '../models/patient.model';
 
 @Injectable({ providedIn: 'root' })
 export class PatientsService {
@@ -46,5 +46,9 @@ export class PatientsService {
     return this.http.get<Patient[]>(`${this.apiUrl}/created-after`, {
       params: new HttpParams().set('from', from)
     });
+  }
+
+  getStats(): Observable<PatientsStats> {
+    return this.http.get<PatientsStats>(`${this.apiUrl}/stats`);
   }
 }

@@ -12,6 +12,7 @@ import { ToastModule } from 'primeng/toast';
 import { of, throwError } from 'rxjs';
 
 import { Patient } from '../../../../core/models/patient.model';
+import { TranslatePipe } from '../../../../core/pipes/translate.pipe';
 import { PatientsService } from '../../../../core/services/patients.service';
 import { PatientFormComponent } from './patient-form.component';
 
@@ -20,10 +21,13 @@ describe('PatientFormComponent', () => {
   let fixture: ComponentFixture<PatientFormComponent>;
   let service: jasmine.SpyObj<PatientsService>;
 
+  let routeId: string | null = null;
+  let routePath = 'new';
+
   const activatedRouteStub = {
     snapshot: {
-      paramMap: { get: () => null },
-      url: [{ path: 'new' }]
+      paramMap: { get: () => routeId },
+      url: [{ get path() { return routePath; } }]
     }
   };
 
@@ -40,6 +44,8 @@ describe('PatientFormComponent', () => {
   };
 
   beforeEach(async () => {
+    routeId = null;
+    routePath = 'new';
     service = jasmine.createSpyObj('PatientsService', [
       'getPatients',
       'getPatient',
@@ -51,7 +57,7 @@ describe('PatientFormComponent', () => {
     service.createPatient.and.returnValue(of(createdPatient));
 
     await TestBed.configureTestingModule({
-      declarations: [PatientFormComponent],
+      declarations: [PatientFormComponent, TranslatePipe],
       imports: [
         NoopAnimationsModule,
         ReactiveFormsModule,
@@ -141,5 +147,22 @@ describe('PatientFormComponent', () => {
 
     expect(component.form.controls['documentNumber'].hasError('duplicate')).toBeTrue();
     expect(component.submitting).toBeFalse();
+  });
+
+  it('should prefill the birthDate control when editing a patient with a full ISO birthDate', () => {
+    routeId = '1';
+    routePath = 'edit';
+    service.getPatient.and.returnValue(of({ ...createdPatient, birthDate: '1988-03-14T00:00:00' }));
+
+    fixture = TestBed.createComponent(PatientFormComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const birthDate = component.form.controls['birthDate'].value;
+    expect(birthDate).toBeInstanceOf(Date);
+    expect(Number.isNaN(birthDate.getTime())).toBeFalse();
+    expect(birthDate.getFullYear()).toBe(1988);
+    expect(birthDate.getMonth()).toBe(2);
+    expect(birthDate.getDate()).toBe(14);
   });
 });

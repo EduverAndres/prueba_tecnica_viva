@@ -72,6 +72,26 @@ public class PatientRepository : IPatientRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<(int Total, int Last30Days, IReadOnlyList<(int Year, int Month, int Count)> ByMonth)> GetStatsAsync(CancellationToken cancellationToken = default)
+    {
+        var total = await _context.Patients.CountAsync(cancellationToken);
+
+        var last30Days = await _context.Patients
+            .CountAsync(p => p.CreatedAt >= DateTime.UtcNow.AddDays(-30), cancellationToken);
+
+        var byMonth = await _context.Patients
+            .AsNoTracking()
+            .Where(p => p.CreatedAt >= DateTime.UtcNow.AddYears(-1))
+            .GroupBy(p => new { p.CreatedAt.Year, p.CreatedAt.Month })
+            .Select(g => new { g.Key.Year, g.Key.Month, Count = g.Count() })
+            .OrderBy(x => x.Year).ThenBy(x => x.Month)
+            .ToListAsync(cancellationToken);
+
+        return (total, last30Days, byMonth
+            .Select(x => (x.Year, x.Month, x.Count))
+            .ToList());
+    }
+
     public async Task<Patient> AddAsync(Patient patient, CancellationToken cancellationToken = default)
     {
         var entry = await _context.Patients.AddAsync(patient, cancellationToken);

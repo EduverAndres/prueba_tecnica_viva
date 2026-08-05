@@ -3,6 +3,7 @@ import { MessageService } from 'primeng/api';
 import * as XLSX from 'xlsx';
 
 import { Patient } from '../../../../core/models/patient.model';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { PatientsService } from '../../../../core/services/patients.service';
 
 @Component({
@@ -18,7 +19,8 @@ export class ReportDialogComponent {
 
   constructor(
     private patientsService: PatientsService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private i18nService: I18nService
   ) {}
 
   open(): void {
@@ -46,12 +48,20 @@ export class ReportDialogComponent {
     this.exporting = true;
     this.patientsService.getPatientsCreatedAfter(toApiDate(this.fromDate)).subscribe({
       next: (patients) => {
-        action(patients);
         this.exporting = false;
+        if (patients.length === 0) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: this.i18nService.translate('report.noResults.summary'),
+            detail: this.i18nService.translate('report.noResults.detail')
+          });
+          return;
+        }
+        action(patients);
         this.messageService.add({
           severity: 'success',
-          summary: 'Exported',
-          detail: `${patients.length} patient(s) exported.`
+          summary: this.i18nService.translate('report.exported.summary'),
+          detail: this.i18nService.translate('report.exported.detail', { count: patients.length })
         });
       },
       error: () => {

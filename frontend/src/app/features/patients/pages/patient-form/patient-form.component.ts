@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
 import { PatientPayload } from '../../../../core/models/patient.model';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { PatientsService } from '../../../../core/services/patients.service';
 
 function birthDateNotInFuture(control: AbstractControl): ValidationErrors | null {
@@ -35,7 +36,8 @@ export class PatientFormComponent implements OnInit {
     private patientsService: PatientsService,
     private route: ActivatedRoute,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private i18nService: I18nService
   ) {}
 
   ngOnInit(): void {
@@ -74,8 +76,8 @@ export class PatientFormComponent implements OnInit {
       next: () => {
         this.messageService.add({
           severity: 'success',
-          summary: this.isEdit ? 'Updated' : 'Created',
-          detail: 'Patient saved successfully.'
+          summary: this.i18nService.translate(this.isEdit ? 'patients.form.saved.summary.updated' : 'patients.form.saved.summary.created'),
+          detail: this.i18nService.translate('patients.form.saved.detail')
         });
         this.router.navigate(['/patients']);
       },
@@ -127,8 +129,12 @@ export class PatientFormComponent implements OnInit {
   }
 }
 
-function parseApiDate(value: string): Date {
-  const [year, month, day] = value.split('-').map(Number);
+function parseApiDate(value: string): Date | null {
+  const [datePart] = value.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+  if (Number.isNaN(year) || Number.isNaN(month) || Number.isNaN(day)) {
+    return null;
+  }
   return new Date(year, month - 1, day);
 }
 

@@ -1,8 +1,10 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Patients.Application.DTOs;
 using Patients.Application.Exceptions;
 using Patients.Application.Interfaces;
 using Patients.Application.Services;
+using Patients.Application.Validators;
 using Patients.Domain.Entities;
 using Patients.Infrastructure.Persistence;
 
@@ -20,7 +22,10 @@ public class PatientServiceTests
 
     private static PatientService CreateService(PatientsDbContext context)
     {
-        return new PatientService(new PatientRepository(context));
+        return new PatientService(
+            new PatientRepository(context),
+            new CreatePatientValidator(),
+            new UpdatePatientValidator());
     }
 
     private static CreatePatientRequest ValidRequest => new(
@@ -182,6 +187,87 @@ public class PatientServiceTests
             service.DeleteAsync(999));
     }
 
+    [Fact]
+    public async Task CreateAsync_ThrowsValidationException_WhenFirstNameIsTooLong()
+    {
+        var service = CreateService(CreateContext());
+
+        var request = ValidRequest with { FirstName = new string('A', 200) };
+
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => service.CreateAsync(request));
+
+        Assert.Contains(exception.Errors, e => e.PropertyName == nameof(CreatePatientRequest.FirstName));
+    }
+
+    [Fact]
+    public async Task CreateAsync_ThrowsValidationException_WhenEmailIsMalformed()
+    {
+        var service = CreateService(CreateContext());
+
+        var request = ValidRequest with { Email = "not-an-email" };
+
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => service.CreateAsync(request));
+
+        Assert.Contains(exception.Errors, e => e.PropertyName == nameof(CreatePatientRequest.Email));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ThrowsValidationException_WhenRequestIsInvalid()
+    {
+        var service = CreateService(CreateContext());
+
+        var request = new UpdatePatientRequest("DNI", "30123456", "María", "González", new DateTime(1988, 3, 14), null, "not-an-email");
+
+        var exception = await Assert.ThrowsAsync<ValidationException>(() => service.UpdateAsync(999, request));
+
+        Assert.Contains(exception.Errors, e => e.PropertyName == nameof(UpdatePatientRequest.Email));
+    }
+
+    [Fact]
+    public async Task GetStatsAsync_ReturnsTotalAndRecentCounts()
+    {
+        var context = CreateContext();
+        SeedPatients(context);
+        var service = CreateService(context);
+
+        var result = await service.GetStatsAsync();
+
+        Assert.Equal(5, result.TotalPatients);
+        Assert.Equal(5, result.CreatedLast30Days);
+    }
+
+    [Fact]
+    public async Task GetStatsAsync_FillsTwelveMonthWindow_WithZeroForEmptyMonths()
+    {
+        var context = CreateContext();
+        SeedPatient(context, "DNI", "99000001", createdMonthsAgo: 1);
+        SeedPatient(context, "DNI", "99000002", createdMonthsAgo: 3);
+        SeedPatient(context, "DNI", "99000003", createdMonthsAgo: 5);
+        var service = CreateService(context);
+
+        var result = await service.GetStatsAsync();
+
+        Assert.Equal(12, result.ByMonth.Count);
+        Assert.All(result.ByMonth, m => Assert.Matches(@"^\d{4}-\d{2}$", m.Month));
+        Assert.Equal(3, result.ByMonth.Sum(m => m.Count));
+        Assert.Contains(result.ByMonth, m => m.Count == 0);
+    }
+
+    [Fact]
+    public async Task GetStatsAsync_ExcludesPatientsOlderThanOneYear_FromByMonth()
+    {
+        var context = CreateContext();
+        SeedPatient(context, "DNI", "88000001", createdMonthsAgo: 1);
+        SeedPatient(context, "DNI", "88000002", createdMonthsAgo: 14);
+        var service = CreateService(context);
+
+        var result = await service.GetStatsAsync();
+
+        // The patient created 14 months ago is outside the 12-month window.
+        Assert.Equal(2, result.TotalPatients);
+        Assert.Equal(1, result.ByMonth.Sum(m => m.Count));
+    }
+
     private static void SeedPatients(PatientsDbContext context)
     {
         context.Patients.AddRange(
@@ -203,6 +289,22 @@ public class PatientServiceTests
             LastName = "González",
             BirthDate = new DateTime(1988, 3, 14),
             CreatedAt = DateTime.UtcNow
+        };
+        context.Patients.Add(patient);
+        context.SaveChanges();
+        return patient;
+    }
+
+    private static Patient SeedPatient(PatientsDbContext context, string documentType, string documentNumber, int createdMonthsAgo)
+    {
+        var patient = new Patient
+        {
+            DocumentType = documentType,
+            DocumentNumber = documentNumber,
+            FirstName = "María",
+            LastName = "González",
+            BirthDate = new DateTime(1988, 3, 14),
+            CreatedAt = DateTime.UtcNow.AddMonths(-createdMonthsAgo)
         };
         context.Patients.Add(patient);
         context.SaveChanges();

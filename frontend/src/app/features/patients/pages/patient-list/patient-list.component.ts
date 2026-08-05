@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 
 import { Patient } from '../../../../core/models/patient.model';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { PatientsService } from '../../../../core/services/patients.service';
 
 @Component({
@@ -30,6 +31,7 @@ export class PatientListComponent implements OnInit, OnDestroy {
     private patientsService: PatientsService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
+    private i18nService: I18nService,
     private router: Router
   ) {}
 
@@ -73,8 +75,10 @@ export class PatientListComponent implements OnInit, OnDestroy {
 
   confirmDelete(patient: Patient): void {
     this.confirmationService.confirm({
-      message: `Delete patient ${patient.firstName} ${patient.lastName}?`,
-      header: 'Confirm deletion',
+      message: this.i18nService.translate('patients.list.confirm.message', {
+        name: `${patient.firstName} ${patient.lastName}`
+      }),
+      header: this.i18nService.translate('patients.list.confirm.header'),
       icon: 'pi pi-exclamation-triangle',
       accept: () => this.deletePatient(patient)
     });
@@ -118,8 +122,8 @@ export class PatientListComponent implements OnInit, OnDestroy {
         this.deletingId = null;
         this.messageService.add({
           severity: 'success',
-          summary: 'Deleted',
-          detail: 'Patient deleted successfully.'
+          summary: this.i18nService.translate('patients.list.deleted.summary'),
+          detail: this.i18nService.translate('patients.list.deleted.detail')
         });
         this.resetAndLoad();
       },

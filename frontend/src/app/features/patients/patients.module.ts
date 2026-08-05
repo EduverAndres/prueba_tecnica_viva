@@ -13,6 +13,8 @@ import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 
+import { SharedModule } from '../../shared/shared.module';
+
 import { PatientsRoutingModule } from './patients-routing.module';
 import { PatientDetailComponent } from './pages/patient-detail/patient-detail.component';
 import { PatientFormComponent } from './pages/patient-form/patient-form.component';
@@ -40,7 +42,8 @@ import { ReportDialogComponent } from './pages/report-dialog/report-dialog.compo
     ConfirmDialogModule,
     ToastModule,
     CardModule,
-    TooltipModule
+    TooltipModule,
+    SharedModule
   ],
   providers: [ConfirmationService]
 })

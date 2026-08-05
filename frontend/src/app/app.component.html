@@ -1,5 +1,10 @@
 <p-toast position="top-right"></p-toast>
 
+<p-progressBar
+  *ngIf="isLoading$ | async"
+  mode="indeterminate"
+  [style]="{ position: 'fixed', top: '0', left: '0', width: '100%', height: '3px', zIndex: '9999', borderRadius: '0' }"></p-progressBar>
+
 <header class="sticky top-0 z-40 border-b border-white/10 bg-slate-900/85 backdrop-blur">
   <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
     <div class="flex items-center gap-3">
@@ -7,14 +12,47 @@
         P
       </div>
       <div class="leading-tight">
-        <span class="app-title block text-lg font-semibold tracking-tight text-white">Patients — Management</span>
-        <span class="hidden text-xs text-slate-400 sm:block">Patient records &amp; appointments</span>
+        <span class="app-title block text-lg font-semibold tracking-tight text-white">{{ 'app.title' | translate }}</span>
+        <span class="hidden text-xs text-slate-400 sm:block">{{ 'app.subtitle' | translate }}</span>
       </div>
     </div>
-    <span class="inline-flex items-center gap-2 rounded-full bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-300 ring-1 ring-inset ring-sky-400/20">
-      <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-      Clinical data
-    </span>
+    <nav class="flex items-center gap-1">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="bg-white/10 text-white"
+        class="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white">{{ 'app.nav.dashboard' | translate }}</a>
+      <a
+        routerLink="/patients"
+        routerLinkActive="bg-white/10 text-white"
+        class="rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white">{{ 'app.nav.patients' | translate }}</a>
+      <button
+        type="button"
+        class="ml-2 flex h-9 items-center justify-center rounded-lg bg-white/10 px-3 text-sm font-semibold text-slate-300 transition-colors hover:bg-white/20 hover:text-white"
+        [attr.aria-label]="(language$ | async) === 'en' ? ('app.lang.es' | translate) : ('app.lang.en' | translate)"
+        (click)="toggleLanguage()">
+        {{ (language$ | async) === 'en' ? 'ES' : 'EN' }}
+      </button>
+      <button
+        type="button"
+        class="ml-2 flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-slate-300 transition-colors hover:bg-white/20 hover:text-white"
+        [attr.aria-label]="(isDark$ | async) ? ('app.theme.light' | translate) : ('app.theme.dark' | translate)"
+        (click)="toggleTheme()">
+        <ng-container *ngIf="isDark$ | async; else sunIcon">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364l-1.414-1.414M6.05 6.05L4.636 4.636m12.728 0l-1.414 1.414M6.05 17.95l-1.414 1.414M12 8a4 4 0 100 8 4 4 0 000-8z" />
+          </svg>
+        </ng-container>
+        <ng-template #sunIcon>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </ng-template>
+      </button>
+      <span class="ml-2 hidden items-center gap-2 rounded-full bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-300 ring-1 ring-inset ring-sky-400/20 sm:inline-flex">
+        <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+        {{ 'app.badge' | translate }}
+      </span>
+    </nav>
   </div>
 </header>
 

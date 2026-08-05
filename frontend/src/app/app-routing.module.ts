@@ -7,6 +7,10 @@ const routes: Routes = [
     path: 'patients',
     loadChildren: () => import('./features/patients/patients.module').then((m) => m.PatientsModule)
   },
+  {
+    path: 'dashboard',
+    loadChildren: () => import('./features/dashboard/dashboard.module').then((m) => m.DashboardModule)
+  },
   { path: '**', redirectTo: 'patients' }
 ];
 

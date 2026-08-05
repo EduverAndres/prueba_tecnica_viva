@@ -34,3 +34,14 @@ export interface PatientQuery {
   name?: string;
   documentNumber?: string;
 }
+
+export interface MonthlyPatientCount {
+  month: string;
+  count: number;
+}
+
+export interface PatientsStats {
+  totalPatients: number;
+  createdLast30Days: number;
+  byMonth: MonthlyPatientCount[];
+}

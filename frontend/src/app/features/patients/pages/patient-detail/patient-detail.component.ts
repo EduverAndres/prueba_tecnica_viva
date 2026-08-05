@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Patient } from '../../../../core/models/patient.model';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { PatientsService } from '../../../../core/services/patients.service';
 
 export interface Appointment {
@@ -30,8 +31,22 @@ export class PatientDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private patientsService: PatientsService,
+    private i18nService: I18nService,
     private router: Router
   ) {}
+
+  statusKey(status: string): string {
+    switch (status) {
+      case 'Completed':
+        return 'patients.detail.status.completed';
+      case 'Scheduled':
+        return 'patients.detail.status.scheduled';
+      case 'Cancelled':
+        return 'patients.detail.status.cancelled';
+      default:
+        return status;
+    }
+  }
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));

@@ -1,29 +1,71 @@
-<p-dialog [(visible)]="visible" header="Patients report" [modal]="true" [style]="{ width: '420px' }">
-  <div class="p-fluid space-y-5">
-    <div class="flex items-start gap-3 rounded-xl bg-slate-50 p-4 ring-1 ring-slate-100">
-      <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white">
-        <i class="pi pi-file-excel"></i>
+﻿<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [dismissableMask]="false"
+  [style]="{ width: '480px', maxWidth: '92vw' }"
+  styleClass="report-dialog"
+  (onHide)="close()">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <div
+        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/20">
+        <i class="pi pi-file-excel text-lg"></i>
       </div>
-      <div>
-        <p class="text-sm font-semibold text-slate-900">Export patient records</p>
-        <p class="mt-1 text-sm leading-relaxed text-slate-600">Patients created after the selected date will be exported as an Excel or CSV file.</p>
+      <div class="leading-tight">
+        <h3 class="m-0 text-base font-semibold text-slate-900 dark:text-white">{{ 'report.header.title' | translate }}</h3>
+        <p class="m-0 text-xs text-slate-500">{{ 'report.header.subtitle' | translate }}</p>
       </div>
     </div>
+  </ng-template>
+
+  <div class="space-y-5">
+    <div class="rounded-xl bg-sky-50 p-4 ring-1 ring-sky-100 dark:bg-sky-500/10 dark:ring-sky-500/20">
+      <p class="m-0 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+        {{ 'report.info' | translate }} <span class="font-semibold text-slate-900">{{ 'report.info.after' | translate }}</span>.
+      </p>
+    </div>
+
     <div>
-      <label for="reportFromDate" class="mb-1.5 block text-sm font-medium text-slate-700">From date</label>
-      <p-calendar
-        inputId="reportFromDate"
-        [(ngModel)]="fromDate"
-        [showIcon]="true"
-        dateFormat="dd/mm/yy"
-        [maxDate]="today"
-        [readonlyInput]="true"
-        placeholder="Select a date"></p-calendar>
+      <label for="reportFromDate" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+        {{ 'report.fromDate' | translate }} <span class="text-rose-500">*</span>
+      </label>
+      <div class="p-fluid">
+        <p-calendar
+          inputId="reportFromDate"
+          [(ngModel)]="fromDate"
+          [showIcon]="true"
+          dateFormat="dd/mm/yy"
+          [maxDate]="today"
+          [readonlyInput]="true"
+          [appendTo]="'body'"
+          [placeholder]="'report.selectDate' | translate"></p-calendar>
+      </div>
+      <p class="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+        {{ 'report.helper' | translate }}
+      </p>
     </div>
   </div>
+
   <ng-template pTemplate="footer">
-    <button pButton label="Cancel" styleClass="p-button-text" (click)="close()"></button>
-    <button pButton label="Export CSV" icon="pi pi-file-csv" [loading]="exporting" [disabled]="!fromDate || exporting" (click)="exportCsv()"></button>
-    <button pButton label="Export Excel" icon="pi pi-file-excel" [loading]="exporting" [disabled]="!fromDate || exporting" (click)="exportExcel()"></button>
+    <div class="flex w-full items-center justify-between gap-3">
+      <button pButton [label]="'report.cancel' | translate" styleClass="p-button-text" (click)="close()"></button>
+      <div class="flex items-center gap-2">
+        <button
+          pButton
+          [label]="'report.exportCsv' | translate"
+          icon="pi pi-file-csv"
+          styleClass="p-button-outlined"
+          [loading]="exporting"
+          [disabled]="!fromDate || exporting"
+          (click)="exportCsv()"></button>
+        <button
+          pButton
+          [label]="'report.exportExcel' | translate"
+          icon="pi pi-file-excel"
+          [loading]="exporting"
+          [disabled]="!fromDate || exporting"
+          (click)="exportExcel()"></button>
+      </div>
+    </div>
   </ng-template>
 </p-dialog>
