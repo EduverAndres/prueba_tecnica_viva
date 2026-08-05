@@ -26,5 +26,13 @@ public class PatientEntityConfiguration : IEntityTypeConfiguration<Patient>
         builder.HasIndex(p => new { p.DocumentType, p.DocumentNumber })
             .IsUnique()
             .HasDatabaseName("UX_Patients_Document");
+
+        // Suggested indexes — keep in sync with /database/indexes.sql.
+        builder.HasIndex(p => new { p.LastName, p.FirstName })
+            .HasDatabaseName("IX_Patients_LastName_FirstName");
+        builder.HasIndex(p => p.CreatedAt)
+            .HasDatabaseName("IX_Patients_CreatedAt");
+        builder.HasIndex(p => p.DocumentNumber)
+            .HasDatabaseName("IX_Patients_DocumentNumber");
     }
 }

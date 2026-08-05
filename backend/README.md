@@ -48,8 +48,11 @@ Hay dos rutas equivalentes; elija una (no ejecute ambas contra la misma base de 
 **Opción A — Scripts SQL (estilo Database-First)**
 
 1. `sqlcmd -S localhost -i database/schema.sql` — crea `PatientsDB`, la tabla `Patients`, la restricción `UNIQUE` sobre `(DocumentType, DocumentNumber)` y el valor por defecto de `CreatedAt` (`SYSUTCDATETIME()`).
-2. `sqlcmd -S localhost -i database/sp_GetPatientsCreatedAfter.sql` — crea el procedimiento almacenado.
-3. `sqlcmd -S localhost -i database/seed.sql` — datos de ejemplo (opcional).
+2. `sqlcmd -S localhost -i database/sp_GetPatientsCreatedAfter.sql` — crea el primer procedimiento almacenado.
+3. `sqlcmd -S localhost -i database/sp_SearchPatients.sql` — crea el segundo procedimiento almacenado.
+4. `sqlcmd -S localhost -i database/fn_GetPatientAge.sql` — crea la función escalar.
+5. `sqlcmd -S localhost -i database/indexes.sql` — crea los índices sugeridos y lista el resultado.
+6. `sqlcmd -S localhost -i database/seed.sql` — datos de ejemplo (opcional).
 
 **Opción B — Migraciones de EF Core (Code-First)**
 
@@ -57,9 +60,18 @@ Hay dos rutas equivalentes; elija una (no ejecute ambas contra la misma base de 
 dotnet ef database update --project backend/src/Patients.Infrastructure --startup-project backend/src/Patients.Api
 ```
 
-La migración inicial (`InitialCreate`) crea la misma tabla, el mismo índice único `UX_Patients_Document` e incluye la creación del procedimiento almacenado, de modo que `database update` produce un esquema idéntico al de la Opción A. Si luego se modifica el modelo de EF, ejecutar `dotnet ef migrations add <Nombre>` y mantener en sincronía `/database/schema.sql` y `sp_GetPatientsCreatedAfter.sql` manualmente.
+La migración inicial (`InitialCreate`) crea la misma tabla, el mismo índice único `UX_Patients_Document` e incluye la creación del primer procedimiento almacenado; la migración `AddDatabaseOptimizations` añade los índices sugeridos, el segundo procedimiento y la función, de modo que `database update` produce un esquema idéntico al de la Opción A. Si luego se modifica el modelo de EF, ejecutar `dotnet ef migrations add <Nombre>` y mantener en sincronía `/database/*.sql` manualmente.
 
-El procedimiento almacenado `dbo.sp_GetPatientsCreatedAfter (@CreatedAfter DATETIME2)` devuelve todos los pacientes creados estrictamente después de la fecha dada, ordenados por `CreatedAt`. Se invoca desde EF Core con `FromSqlRaw` en `PatientRepository.GetCreatedAfterAsync`.
+### Objetos de base de datos
+
+| Objeto | Tipo | Propósito |
+|---|---|---|
+| `dbo.sp_GetPatientsCreatedAfter (@CreatedAfter DATETIME2)` | Procedimiento | Devuelve los pacientes creados estrictamente después de una fecha, ordenados por `CreatedAt`. Se invoca desde EF Core con `FromSqlRaw` en `PatientRepository.GetCreatedAfterAsync` (endpoint de reporte). |
+| `dbo.sp_SearchPatients (@Name, @DocumentNumber, @Page, @PageSize)` | Procedimiento | Búsqueda paginada con filtros opcionales: `@Name` (coincidencia parcial, con comodines `% _ [ ]` escapados) y `@DocumentNumber` (exacto). Devuelve dos conjuntos de resultados: `Total` (para la paginación del cliente) y la página solicitada ordenada por `LastName, FirstName`. Usa `OFFSET/FETCH`. Espeja la lógica de `PatientRepository.GetPagedAsync`. |
+| `dbo.fn_GetPatientAge (@BirthDate DATE)` | Función escalar | Edad en años cumplidos sobre la fecha UTC actual. Devuelve `NULL` si la fecha es nula o futura. Uso: `SELECT dbo.fn_GetPatientAge(BirthDate) FROM dbo.Patients;` |
+| `IX_Patients_LastName_FirstName` | Índice | Soporta el `ORDER BY` del listado y la búsqueda por nombre (prefijo o parcial). |
+| `IX_Patients_CreatedAt` | Índice | Soporta las estadísticas mensuales del dashboard, el KPI de 30 días y el reporte "creados después de". |
+| `IX_Patients_DocumentNumber` | Índice | Soporta el filtro exacto por número de documento sin tipo (el índice único compuesto `UX_Patients_Document` no cubre esa consulta). |
 
 ## Ejecutar la API localmente
 
